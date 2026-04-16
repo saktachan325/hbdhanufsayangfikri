@@ -1,0 +1,318 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Happy Birthday Sayangku 🎂</title>
+
+    <!-- Font -->
+    <link href="https://fonts.googleapis.com/css2?family=Quicksand:wght@500;700&display=swap" rel="stylesheet">
+    
+    <!-- SweetAlert2 untuk Pesan -->
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+
+    <!-- Library 3D Mewah (Three.js & OrbitControls) -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/controls/OrbitControls.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/tween.js/18.6.4/tween.umd.js"></script>
+
+    <style>
+        * {
+            margin: 0; padding: 0;
+            box-sizing: border-box;
+            user-select: none;
+            font-family: 'Quicksand', sans-serif;
+        }
+
+        body {
+            background-color: #050510;
+            background-image: radial-gradient(circle at center, #1a1a2e 0%, #050510 100%);
+            overflow: hidden; 
+            color: white;
+            touch-action: none; 
+        }
+
+        #canvas-container {
+            position: absolute; top: 0; left: 0;
+            width: 100%; height: 100%; z-index: 1;
+        }
+
+        /* Layar Pembuka (Intro) */
+        #intro {
+            position: fixed; top: 0; left: 0;
+            width: 100%; height: 100%;
+            background: rgba(0, 0, 0, 0.95); backdrop-filter: blur(8px);
+            z-index: 999; display: flex; flex-direction: column;
+            justify-content: center; align-items: center;
+            transition: opacity 1s ease;
+        }
+
+        .tap-icon {
+            font-size: 80px; cursor: pointer; animation: bounce 2s infinite;
+            filter: drop-shadow(0 0 30px rgba(255, 182, 193, 0.8));
+        }
+
+        .intro-text {
+            margin-top: 20px; font-size: 18px; font-weight: 700;
+            letter-spacing: 1px; text-align: center;
+            text-shadow: 0 0 10px rgba(255, 255, 255, 0.5);
+            animation: pulse 2s infinite;
+        }
+
+        @keyframes bounce {
+            0%, 20%, 50%, 80%, 100% { transform: translateY(0); }
+            40% { transform: translateY(-30px); }
+            60% { transform: translateY(-15px); }
+        }
+        @keyframes pulse {
+            0%, 100% { opacity: 0.6; } 50% { opacity: 1; }
+        }
+
+        /* UI Overlays */
+        #ui-layer {
+            position: absolute; top: 0; left: 0;
+            width: 100%; height: 100%; z-index: 10; pointer-events: none; 
+            display: flex; flex-direction: column;
+            justify-content: space-between; padding: 40px 20px;
+            opacity: 0; transition: opacity 2s ease;
+        }
+
+        .header-text { text-align: center; text-shadow: 0 2px 10px rgba(0,0,0,0.8); }
+        .header-text h1 { font-size: 24px; color: #ffb6c1; margin-bottom: 8px; line-height: 1.3; }
+        .header-text p {
+            font-size: 13px; color: #e0e0e0; background: rgba(0,0,0,0.5);
+            display: inline-block; padding: 6px 16px; border-radius: 20px;
+            backdrop-filter: blur(5px); border: 1px solid rgba(255,255,255,0.1);
+        }
+
+        .footer-controls { text-align: center; pointer-events: auto; margin-bottom: 20px; }
+        .btn-pesan {
+            background: rgba(255, 182, 193, 0.15); border: 2px solid #ffb6c1; color: white;
+            padding: 14px 30px; border-radius: 50px; font-size: 15px; font-weight: bold;
+            cursor: pointer; backdrop-filter: blur(5px); transition: all 0.3s;
+            box-shadow: 0 0 15px rgba(255, 182, 193, 0.2); animation: pulseBtn 2s infinite;
+        }
+
+        @keyframes pulseBtn {
+            0%, 100% { box-shadow: 0 0 10px rgba(255,182,193,0.3); }
+            50% { box-shadow: 0 0 25px rgba(255,182,193,0.7); transform: translateY(-2px); }
+        }
+
+        .swal2-popup { border-radius: 20px !important; border: 1px solid rgba(255, 182, 193, 0.3); }
+    </style>
+</head>
+<body>
+
+    <!-- BACA MUSIK DARI LINK YANG KAMU KASIH (Pasti Bunyi) -->
+    <audio id="bgm" src="https://feeldreams.github.io/djikhlas.mp3" loop></audio>
+
+    <!-- Layar Intro -->
+    <div id="intro">
+        <div class="tap-icon" onclick="mulaiAplikasi()">🎁</div>
+        <div class="intro-text">Ada kado buat Hanuf...</div>
+    </div>
+
+    <!-- UI Overlay -->
+    <div id="ui-layer">
+        <div class="header-text">
+            <h1>Happy Birthday Sayangku,<br>Hanuf Maulidina ❤️</h1>
+            <p>Geser layar untuk memutar | Cubit untuk Zoom</p>
+        </div>
+        <div class="footer-controls">
+            <button class="btn-pesan" onclick="bukaPesan()">Buka Kado Pesannya 💌</button>
+        </div>
+    </div>
+
+    <!-- Tempat Objek 3D -->
+    <div id="canvas-container"></div>
+
+    <script>
+        // Menggunakan file foto yang sudah di-upload di GitHub kamu (1.jpg sampai 21.jpg)
+        const daftarFoto = [
+            "1.jpg", "2.jpg", "3.jpg", "4.jpg", "5.jpg", "6.jpg", "7.jpg",
+            "8.jpg", "9.jpg", "10.jpg", "11.jpg", "12.jpg", "13.jpg", "14.jpg",
+            "15.jpg", "16.jpg", "17.jpg", "18.jpg", "19.jpg", "20.jpg", "21.jpg"
+        ];
+
+        let scene, camera, renderer, controls;
+        let bolaGrup = new THREE.Group(); 
+        let isAppStarted = false;
+
+        function mulaiAplikasi() {
+            if (isAppStarted) return;
+            isAppStarted = true;
+
+            // Logika Play Musik yang dipaksa nyala saat kado diklik
+            let audio = document.getElementById('bgm');
+            audio.volume = 1;
+            audio.play().catch(e => {
+                console.log('Autoplay dicegah browser, butuh interaksi tambahan');
+                document.body.addEventListener('click', () => audio.play(), { once: true });
+            });
+
+            document.getElementById('intro').style.opacity = '0';
+            setTimeout(() => {
+                document.getElementById('intro').style.display = 'none';
+                document.getElementById('ui-layer').style.opacity = '1';
+                init3D();
+            }, 800);
+        }
+
+        function init3D() {
+            const container = document.getElementById('canvas-container');
+
+            scene = new THREE.Scene();
+            scene.fog = new THREE.FogExp2(0x050510, 0.0006);
+
+            camera = new THREE.PerspectiveCamera(60, window.innerWidth / window.innerHeight, 1, 6000);
+            camera.position.z = 2400; 
+
+            renderer = new THREE.WebGLRenderer({ antialias: true, alpha: true });
+            renderer.setPixelRatio(window.devicePixelRatio);
+            renderer.setSize(window.innerWidth, window.innerHeight);
+            container.appendChild(renderer.domElement);
+
+            controls = new THREE.OrbitControls(camera, renderer.domElement);
+            controls.enableDamping = true; 
+            controls.dampingFactor = 0.05;
+            controls.enablePan = false; 
+            controls.minDistance = 900;  
+            controls.maxDistance = 4500; 
+
+            scene.add(bolaGrup);
+            buatBolaFoto();
+            buatBintang();
+
+            window.addEventListener('resize', onWindowResize);
+            animate();
+        }
+
+        function buatBolaFoto() {
+            const jumlahFoto = 60; 
+            const radius = 850; 
+            const phi = Math.PI * (3 - Math.sqrt(5)); 
+            const textureLoader = new THREE.TextureLoader();
+
+            for (let i = 0; i < jumlahFoto; i++) {
+                const y = 1 - (i / (jumlahFoto - 1)) * 2; 
+                const radiusAtY = Math.sqrt(1 - y * y); 
+                const theta = phi * i; 
+
+                const targetX = Math.cos(theta) * radiusAtY * radius;
+                const targetY = y * radius;
+                const targetZ = Math.sin(theta) * radiusAtY * radius;
+                const targetPosition = new THREE.Vector3(targetX, targetY, targetZ);
+
+                const polaroidGrup = new THREE.Group();
+
+                const bgGeo = new THREE.PlaneGeometry(240, 280);
+                const bgMat = new THREE.MeshBasicMaterial({ color: 0xffffff, side: THREE.DoubleSide });
+                const bgMesh = new THREE.Mesh(bgGeo, bgMat);
+                polaroidGrup.add(bgMesh);
+
+                const photoGeo = new THREE.PlaneGeometry(220, 220);
+                const photoMat = new THREE.MeshBasicMaterial({ color: 0xffb6c1 }); 
+                const photoMesh = new THREE.Mesh(photoGeo, photoMat);
+                photoMesh.position.y = 20; 
+                photoMesh.position.z = 2;  
+                polaroidGrup.add(photoMesh);
+
+                polaroidGrup.position.copy(targetPosition);
+                polaroidGrup.lookAt(new THREE.Vector3(0, 0, 0));
+                polaroidGrup.rotateY(Math.PI); 
+
+                bolaGrup.add(polaroidGrup);
+
+                const indexGambar = i % daftarFoto.length;
+                textureLoader.load(
+                    daftarFoto[indexGambar],
+                    function(texture) {
+                        texture.minFilter = THREE.LinearFilter;
+                        photoMesh.material.map = texture;
+                        photoMesh.material.color.setHex(0xffffff); 
+                        photoMesh.material.needsUpdate = true;
+                    }
+                );
+
+                polaroidGrup.position.set(0, 0, 0);
+                new TWEEN.Tween(polaroidGrup.position)
+                    .to({ x: targetPosition.x, y: targetPosition.y, z: targetPosition.z }, Math.random() * 2500 + 1500)
+                    .easing(TWEEN.Easing.Cubic.Out)
+                    .start();
+            }
+        }
+
+        function buatBintang() {
+            const starsGeometry = new THREE.BufferGeometry();
+            const starsCount = 2000;
+            const posArray = new Float32Array(starsCount * 3);
+
+            for(let i = 0; i < starsCount * 3; i++) {
+                posArray[i] = (Math.random() - 0.5) * 5000;
+            }
+
+            starsGeometry.setAttribute('position', new THREE.BufferAttribute(posArray, 3));
+            
+            const starsMaterial = new THREE.PointsMaterial({
+                size: 3.5, color: 0xffe6e6, transparent: true, opacity: 0.7
+            });
+
+            const starMesh = new THREE.Points(starsGeometry, starsMaterial);
+            scene.add(starMesh);
+        }
+
+        function animate() {
+            requestAnimationFrame(animate);
+            TWEEN.update();
+
+            if (bolaGrup) {
+                bolaGrup.rotation.y -= 0.0008;
+                bolaGrup.rotation.x += 0.0004;
+            }
+
+            controls.update();
+            renderer.render(scene, camera);
+        }
+
+        function onWindowResize() {
+            camera.aspect = window.innerWidth / window.innerHeight;
+            camera.updateProjectionMatrix();
+            renderer.setSize(window.innerWidth, window.innerHeight);
+        }
+
+        // --- SURAT ULANG TAHUN UNTUK HANUF ---
+        function bukaPesan() {
+            Swal.fire({
+                title: 'Happy Birthday, Hanuf Maulidina Tersayang 🎂🤍',
+                html: `
+                    <div style="text-align: left; font-size: 14.5px; line-height: 1.7;">
+                        <p>Selamat ulang tahun yaa buat orang yang paling spesial di hidupku! ✨</p><br>
+                        
+                        <p>Aku rintis bola kenangan ini khusus buat ngerayain hari lahirmu. Coba deh puter-puter fotonya... tiap kepingan foto itu adalah bukti betapa bahagianya aku punya kamu.</p><br>
+                        
+                        <p>Semoga di umur yang baru ini kamu panjang umur, sehat selalu, makin dewasa, dan semua mimpi-mimpimu bisa kita wujudkan bareng-bareng ya sayang.</p><br>
+                        
+                        <p>Makasih udah lahir ke dunia dan makasih udah jadi bagian dari duniaku yang paling indah.</p><br>
+                        
+                        <p style="text-align:center;"><b>I Love You to the moon and back! 🚀❤️</b></p>
+                    </div>
+                `,
+                background: '#1a1a2e',
+                color: '#fff',
+                confirmButtonText: 'Balas Sayang 💌',
+                confirmButtonColor: '#ffb6c1',
+                backdrop: `rgba(5, 5, 16, 0.9)`
+            }).then((result) => {
+                if (result.isConfirmed) {
+                    // Nomor WA udah sesuai: 6287763413521
+                    let nomorWA = "6287763413521"; 
+                    let pesanWA = "Aaaa sayanggg... Makasih banyak yaa kado website-nya lucu banget ada lagunya juga! I Love You Moreee 😭🌎🤍";
+                    window.location.href = `https://api.whatsapp.com/send?phone=${nomorWA}&text=${encodeURIComponent(pesanWA)}`;
+                }
+            });
+        }
+    </script>
+</body>
+</html>
+
+```
