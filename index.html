@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Happy Birthday Sayangku 🎂</title>
+    <title>Selamat Ulang Tahun Sayangku 🎂</title>
 
     <!-- Font -->
     <link href="https://fonts.googleapis.com/css2?family=Quicksand:wght@500;700&display=swap" rel="stylesheet">
@@ -103,23 +103,23 @@
 </head>
 <body>
 
-    <!-- BACA MUSIK DARI LINK YANG KAMU KASIH (Pasti Bunyi) -->
+    <!-- Audio BGM (Lagu telah diperbarui) -->
     <audio id="bgm" src="https://feeldreams.github.io/djikhlas.mp3" loop></audio>
 
     <!-- Layar Intro -->
     <div id="intro">
         <div class="tap-icon" onclick="mulaiAplikasi()">🎁</div>
-        <div class="intro-text">Ada kado buat Hanuf...</div>
+        <div class="intro-text">Pencet kadonya ya sayang...</div>
     </div>
 
     <!-- UI Overlay -->
     <div id="ui-layer">
         <div class="header-text">
-            <h1>Happy Birthday Sayangku,<br>Hanuf Maulidina ❤️</h1>
+            <h1>Selamat Ulang Tahun Yaa Sayangku,<br>Hanuf Maulidina 🎂❤️</h1>
             <p>Geser layar untuk memutar | Cubit untuk Zoom</p>
         </div>
         <div class="footer-controls">
-            <button class="btn-pesan" onclick="bukaPesan()">Buka Kado Pesannya 💌</button>
+            <button class="btn-pesan" onclick="bukaPesan()">Buka Pesan Ulang Tahunnya Yaa 💌</button>
         </div>
     </div>
 
@@ -127,11 +127,29 @@
     <div id="canvas-container"></div>
 
     <script>
-        // Menggunakan file foto yang sudah di-upload di GitHub kamu (1.jpg sampai 21.jpg)
+        // --- 21 FOTO MILIKMU ---
         const daftarFoto = [
-            "1.jpg", "2.jpg", "3.jpg", "4.jpg", "5.jpg", "6.jpg", "7.jpg",
-            "8.jpg", "9.jpg", "10.jpg", "11.jpg", "12.jpg", "13.jpg", "14.jpg",
-            "15.jpg", "16.jpg", "17.jpg", "18.jpg", "19.jpg", "20.jpg", "21.jpg"
+            "https://i.postimg.cc/7LFkz5N9/IMG-20250807-171041.jpg",
+            "https://i.postimg.cc/XvRb5rgX/IMG-20250818-150058-594.webp",
+            "https://i.postimg.cc/pdwHjmBB/IMG-20250818-161544.jpg",
+            "https://i.postimg.cc/QM237FqB/IMG-20250908-121741-398.webp",
+            "https://i.postimg.cc/XJ90kn2g/IMG-20250911-163519.jpg",
+            "https://i.postimg.cc/QtcrJj61/IMG-20250912-231306.jpg",
+            "https://i.postimg.cc/zBT1FqdF/IMG-20250915-133120-512.webp",
+            "https://i.postimg.cc/yd0zy7fP/IMG-20250918-142815-834.webp",
+            "https://i.postimg.cc/MT18mzs5/IMG-20250923-111622-593.webp",
+            "https://i.postimg.cc/Px1kQd66/IMG-20251002-120946-968.webp",
+            "https://i.postimg.cc/508MSf7d/IMG-20251006-155449.jpg",
+            "https://i.postimg.cc/fLYhfMH6/IMG-20251015-WA0007.jpg",
+            "https://i.postimg.cc/SRqbZH5v/IMG-20251021-174521.jpg",
+            "https://i.postimg.cc/76Synqsk/IMG-20251024-204006.jpg",
+            "https://i.postimg.cc/FzmXPw84/IMG-20251112-154510-846.webp",
+            "https://i.postimg.cc/qq0HmWSH/IMG-20251120-113458-953.webp",
+            "https://i.postimg.cc/Rh9xP2ym/IMG-20251127-135353-294.webp",
+            "https://i.postimg.cc/SRqbZH3j/IMG-20251202-194227-246.webp",
+            "https://i.postimg.cc/d3vcWgph/IMG-20251210-132349-969.webp",
+            "https://i.postimg.cc/SRqbZH3z/IMG-20260201-220009.jpg",
+            "https://i.postimg.cc/R0kBtWT4/Picsart-25-05-17-14-11-50-003.jpg"
         ];
 
         let scene, camera, renderer, controls;
@@ -142,18 +160,15 @@
             if (isAppStarted) return;
             isAppStarted = true;
 
-            // Logika Play Musik yang dipaksa nyala saat kado diklik
-            let audio = document.getElementById('bgm');
-            audio.volume = 1;
-            audio.play().catch(e => {
-                console.log('Autoplay dicegah browser, butuh interaksi tambahan');
-                document.body.addEventListener('click', () => audio.play(), { once: true });
-            });
+            // Mainkan musik
+            document.getElementById('bgm').play().catch(e => console.log('Autoplay dicegah'));
 
+            // Sembunyikan intro perlahan
             document.getElementById('intro').style.opacity = '0';
             setTimeout(() => {
                 document.getElementById('intro').style.display = 'none';
                 document.getElementById('ui-layer').style.opacity = '1';
+                
                 init3D();
             }, 800);
         }
@@ -161,17 +176,20 @@
         function init3D() {
             const container = document.getElementById('canvas-container');
 
+            // 1. Scene & Camera
             scene = new THREE.Scene();
             scene.fog = new THREE.FogExp2(0x050510, 0.0006);
 
             camera = new THREE.PerspectiveCamera(60, window.innerWidth / window.innerHeight, 1, 6000);
             camera.position.z = 2400; 
 
+            // 2. Renderer
             renderer = new THREE.WebGLRenderer({ antialias: true, alpha: true });
             renderer.setPixelRatio(window.devicePixelRatio);
             renderer.setSize(window.innerWidth, window.innerHeight);
             container.appendChild(renderer.domElement);
 
+            // 3. OrbitControls (Zoom & Putar)
             controls = new THREE.OrbitControls(camera, renderer.domElement);
             controls.enableDamping = true; 
             controls.dampingFactor = 0.05;
@@ -180,7 +198,11 @@
             controls.maxDistance = 4500; 
 
             scene.add(bolaGrup);
+
+            // 4. Bangun Bola
             buatBolaFoto();
+
+            // 5. Bintang
             buatBintang();
 
             window.addEventListener('resize', onWindowResize);
@@ -191,7 +213,9 @@
             const jumlahFoto = 60; 
             const radius = 850; 
             const phi = Math.PI * (3 - Math.sqrt(5)); 
+
             const textureLoader = new THREE.TextureLoader();
+            textureLoader.setCrossOrigin('anonymous'); 
 
             for (let i = 0; i < jumlahFoto; i++) {
                 const y = 1 - (i / (jumlahFoto - 1)) * 2; 
@@ -203,6 +227,7 @@
                 const targetZ = Math.sin(theta) * radiusAtY * radius;
                 const targetPosition = new THREE.Vector3(targetX, targetY, targetZ);
 
+                // --- BIKIN KARTU POLAROID UKURAN BESAR ---
                 const polaroidGrup = new THREE.Group();
 
                 const bgGeo = new THREE.PlaneGeometry(240, 280);
@@ -234,6 +259,7 @@
                     }
                 );
 
+                // --- ANIMASI MELEDAK DARI TENGAH ---
                 polaroidGrup.position.set(0, 0, 0);
                 new TWEEN.Tween(polaroidGrup.position)
                     .to({ x: targetPosition.x, y: targetPosition.y, z: targetPosition.z }, Math.random() * 2500 + 1500)
@@ -265,6 +291,7 @@
             requestAnimationFrame(animate);
             TWEEN.update();
 
+            // Putar bola perlahan otomatis
             if (bolaGrup) {
                 bolaGrup.rotation.y -= 0.0008;
                 bolaGrup.rotation.x += 0.0004;
@@ -280,33 +307,32 @@
             renderer.setSize(window.innerWidth, window.innerHeight);
         }
 
-        // --- SURAT ULANG TAHUN UNTUK HANUF ---
+        // --- PESAN BUCIN DENGAN NOMOR WA YANG BARU ---
         function bukaPesan() {
             Swal.fire({
-                title: 'Happy Birthday, Hanuf Maulidina Tersayang 🎂🤍',
+                title: 'Happy Birthday Sayangku, Hanuf Maulidina 🥳🤍',
                 html: `
                     <div style="text-align: left; font-size: 14.5px; line-height: 1.7;">
-                        <p>Selamat ulang tahun yaa buat orang yang paling spesial di hidupku! ✨</p><br>
+                        <p>Selamat bertambah usia yaa, kesayanganku! Di hari spesial ini, aku berdoa semoga kamu selalu sehat, bahagia terus, dan dilancarkan semua urusannya. ✨</p><br>
                         
-                        <p>Aku rintis bola kenangan ini khusus buat ngerayain hari lahirmu. Coba deh puter-puter fotonya... tiap kepingan foto itu adalah bukti betapa bahagianya aku punya kamu.</p><br>
+                        <p>Sengaja aku rakit galeri kenangan ini khusus sebagai hadiah kecil buat kamu. Biar kamu bisa lihat lagi perjalanan cerita kita dan seneng terus di hari ulang tahunmu ini.</p><br>
                         
-                        <p>Semoga di umur yang baru ini kamu panjang umur, sehat selalu, makin dewasa, dan semua mimpi-mimpimu bisa kita wujudkan bareng-bareng ya sayang.</p><br>
+                        <p>Coba deh puter-puter fotonya. Liat kan? Sama kayak bumi yang terus berputar, kamu itu pusat duniaku yang selalu bikin hari-hariku jadi lebih berwarna.</p><br>
                         
-                        <p>Makasih udah lahir ke dunia dan makasih udah jadi bagian dari duniaku yang paling indah.</p><br>
+                        <p>Semoga semua cita-cita dan harapan baikmu segera terwujud ya, sayang. Aku janji bakal terus ada di sampingmu buat nemenin kamu meraih mimpi-mimpimu.</p><br>
                         
-                        <p style="text-align:center;"><b>I Love You to the moon and back! 🚀❤️</b></p>
+                        <p style="text-align:center;"><b>I Love You so much! 🚀❤️</b></p>
                     </div>
                 `,
                 background: '#1a1a2e',
                 color: '#fff',
-                confirmButtonText: 'Balas Sayang 💌',
+                confirmButtonText: 'Balas Pesannya Yaa 💌',
                 confirmButtonColor: '#ffb6c1',
                 backdrop: `rgba(5, 5, 16, 0.9)`
             }).then((result) => {
                 if (result.isConfirmed) {
-                    // Nomor WA udah sesuai: 6287763413521
                     let nomorWA = "6287763413521"; 
-                    let pesanWA = "Aaaa sayanggg... Makasih banyak yaa kado website-nya lucu banget ada lagunya juga! I Love You Moreee 😭🌎🤍";
+                    let pesanWA = "Aaaa sayanggg... Makasih banyak yaa ucapan ulang tahun sama kado webnya! Aku jadi terharu dan senyum terus liat foto kita 😭🌎🤍";
                     window.location.href = `https://api.whatsapp.com/send?phone=${nomorWA}&text=${encodeURIComponent(pesanWA)}`;
                 }
             });
